@@ -1,0 +1,62 @@
+<project name="Build File 3" default="FullDeploy" basedir="." xmlns:sf="antlib:com.salesforce">
+  <property name="src.dir" value="../src" />
+  <property environment="dev" />
+
+  <!-- Setting default value for username, password and session id properties to empty string 
+         so unset values are treated as empty. Without this, ant expressions such as ${sf.username}
+         will be treated literally.  Service hook test
+    -->
+  <condition property="sf.username" value="">
+    <not>
+      <isset property="sf.username" />
+    </not>
+  </condition>
+  <condition property="sf.password" value="">
+    <not>
+      <isset property="sf.password" />
+    </not>
+  </condition>
+  <condition property="sf.sessionId" value="">
+    <not>
+      <isset property="sf.sessionId" />
+    </not>
+  </condition>
+
+  <taskdef resource="com/salesforce/antlib.xml" uri="antlib:com.salesforce">
+    <classpath>
+      <pathelement location="../deploy/migration-tool/ant-salesforce.jar" />
+    </classpath>
+  </taskdef>
+
+  <!-- Deploy code and run tests.  If test fails, rollback deploy. -->
+  <!--Full Deploy-->
+	<target name="FullDeploy">
+	    <echo message="*** Executing DeployAllFilesToDemoOrg ***" /> 
+	    <property name="sf.contents" value="**" /> 
+	    <echo message="Deleting ZIP file from ${src.dir}" />	 
+	    <delete file="package.zip" />
+	    <echo message="Creating ZIP file from ${src.dir} with ${sf.contents}" />	 
+	    <zip destfile="package.zip">
+	      <zipfileset dir="${src.dir}" excludes="package.xml" includes="${sf.contents}" />
+	      <mappedresources>
+	        <fileset dir="${src.dir}" includes="package.xml" />
+	        <flattenmapper />
+	      </mappedresources>
+	    </zip>
+	  	<sf:deploy 
+	  	          username="${sf.demo.username}" 
+	  	          password="${sf.demo.password}" 
+	  	          sessionId="${sf.sessionId}" 
+	  	          serverurl="${sf.serverurl}" 
+	  	          maxPoll="${sf.maxPoll}" 
+	  	          zipFile="package.zip"
+	  	          rollbackOnError="true" 
+	  	          logType="Debugonly"
+	  	          checkOnly="false"
+	  		testLevel="RunLocalTests">
+	  	    	<!-- <runTest>MemberSearch_Controller_Test_HF</runTest>   
+	  			<runtest>GenericInterfaceCallout_Utility_Test_HF</runtest> -->
+	  	</sf:deploy>
+	  </target>
+  <!--Full Deploy-->
+</project>
