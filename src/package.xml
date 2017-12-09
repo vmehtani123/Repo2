@@ -3,6 +3,7 @@
     <types>
         <members>Test</members>
         <members>Test1</members>
+        <members>Test2</members>
         <name>ApexPage</name>
     </types>
     <version>36.0</version>
